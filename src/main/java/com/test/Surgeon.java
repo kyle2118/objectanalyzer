@@ -1,24 +1,27 @@
 package com.test;
 
 
-import com.sun.istack.internal.NotNull;
 import com.test.log.Logger;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class Surgeon {
     private Logger logger;
+
     public Surgeon() {
         logger = new Logger();
     }
+
     public void ensure(Object object, boolean isEncrypt) {
-        String command = isEncrypt? "Encryption" : "Decryption";
+        String command = isEncrypt ? "Encryption" : "Decryption";
         long startMs = System.currentTimeMillis();
-        LOGGER.debug("{} of {} object starting.", command, object.getClass().getSimpleName());
+        logger.log(String.format("%s of %s object starting.", command, object.getClass().getSimpleName()));
 
         try {
             // Analyze object itself
@@ -61,11 +64,11 @@ public class Surgeon {
             for (Field declaredField : object.getClass().getDeclaredFields()) {
                 declaredField.setAccessible(true);
                 Type fieldType = declaredField.getType();
-                System.out.println(declaredField.getClass());
+                /*System.out.println(declaredField.getClass());
                 System.out.println((declaredField.getType()));
                 System.out.println(declaredField.getDeclaringClass());
                 System.out.println(fieldType.getTypeName());
-                System.out.println(fieldType.getClass());
+                System.out.println(fieldType.getClass());*/
 
                 if (Iterable.class.isAssignableFrom(declaredField.getType()) ||
                         Map.class.isAssignableFrom(declaredField.getType())) {
@@ -86,26 +89,40 @@ public class Surgeon {
 
     }
 
-    private void handleCollection(Collection object) {
+    /**
+     * Handles scenarios when a object has list of something.
+     * Instead of iterating every element and checking its type,
+     * method gets the first element and iterates the rest
+     * if type is a user defined type, aka Bean
+     *
+     * @param collection is a collection(list, set, queue, stack, vector
+     */
+    private void handleCollection(Collection<?> collection) {
         Class typeClass = null;
-        if (object.size() > 0) {
-            Iterator iterator = object.iterator();
-            if (iterator.hasNext()) {
-                Object firstElement = iterator.next();
-                typeClass = firstElement.getClass();
+        Iterator iterator = collection.iterator();
+        if (iterator.hasNext()) {
+            Object firstElement = iterator.next();
+            typeClass = firstElement.getClass();
+            logger.log(String.format("First element type: %s", typeClass));
+            if (isComplex(typeClass)) {
+
             }
         }
 
+
     }
 
-    private boolean isComplex(@NotNull Class<?> clazz) {
+    /**
+     * Checks if a {@code clazz} is a user defined type, ie Bean
+     *
+     * @param clazz is a {@link Class} object
+     * @return true if class is a bean, false otherwise
+     */
+    private boolean isComplex(Class<?> clazz) {
 
         // Number is a super type of Byte, Short, Integer, Float, Double
-        if (!Number.class.isAssignableFrom(clazz)
+        return !Number.class.isAssignableFrom(clazz)
                 || !Character.class.isAssignableFrom(clazz)
-                || !CharSequence.class.isAssignableFrom(clazz)) {
-            return true;
-        }
-        return false;
+                || !CharSequence.class.isAssignableFrom(clazz);
     }
 }

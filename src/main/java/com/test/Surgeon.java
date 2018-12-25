@@ -28,6 +28,7 @@ public class Surgeon {
 
             // Handle Iterable
             Class<?> objectClass = object.getClass();
+
             if (Collection.class.isAssignableFrom(objectClass)) {
                 handleCollection((Collection<?>) object, isEncrypt);
 
@@ -41,6 +42,7 @@ public class Surgeon {
              */
             if (Map.class.isAssignableFrom(objectClass)) {
                 Map<?, ?> objectMap = (Map<?, ?>) object;
+                handleMap((Map<?, ?>)object, isEncrypt);
                 for (Map.Entry<?, ?> entry : objectMap.entrySet()) {
                     // entry key must be a primitive, wrapper or String
                     if (isComplex(entry.getValue().getClass())) {
@@ -77,6 +79,24 @@ public class Surgeon {
             logger.log(String.format("%s finished in", command));
         }
 
+    }
+
+    private void handleMap(Map<?, ?> map, boolean isEncrypt) {
+        if (map == null) {
+            return;
+        }
+        Class keyClass;
+        Class valueClass;
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            keyClass = entry.getKey().getClass();
+            if (isComplex(keyClass)) {
+                ensure(entry.getKey(), isEncrypt);
+            }
+            valueClass = entry.getValue().getClass();
+            if (isComplex(valueClass)) {
+                ensure(entry.getValue(), isEncrypt);
+            }
+        }
     }
 
     /**

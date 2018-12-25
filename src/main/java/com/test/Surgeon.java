@@ -29,18 +29,8 @@ public class Surgeon {
             // Handle Iterable
             Class<?> objectClass = object.getClass();
             if (Collection.class.isAssignableFrom(objectClass)) {
-                Collection<?> iterableObject = (Collection<?>) object;
-                handleCollection((Collection<?>) object);
-                // TODO refactor
-                // Instead of iterating every element in case of a complex type
-                // check once
-                // If generic type is bean, then iterate and make a reflective call
-                // Otherwise do not touch
-                for (Object element : iterableObject) {
-                    if (isComplex(element.getClass())) {
-                        ensure(element, isEncrypt);
-                    }
-                }
+                handleCollection((Collection<?>) object, isEncrypt);
+
             }
             // Handle Map
             /*
@@ -91,21 +81,23 @@ public class Surgeon {
 
     /**
      * Handles scenarios when a object has list of something.
-     * Instead of iterating every element and checking its type,
-     * method gets the first element and iterates the rest
-     * if type is a user defined type, aka Bean
+     * Method gets the first element and iterates the rest
+     * if type of the first is a user defined type, aka Bean
      *
-     * @param collection is a collection(list, set, queue, stack, vector
+     * @param collection is a collection(list, set, queue, stack, vector)
      */
-    private void handleCollection(Collection<?> collection) {
-        Class typeClass = null;
+    private void handleCollection(Collection<?> collection, boolean isEncrypt) {
+        if (collection == null) {
+            return;
+        }
+        Class typeClass;
         Iterator iterator = collection.iterator();
         if (iterator.hasNext()) {
-            Object firstElement = iterator.next();
-            typeClass = firstElement.getClass();
+            Object element = iterator.next();
+            typeClass = element.getClass();
             logger.log(String.format("First element type: %s", typeClass));
             if (isComplex(typeClass)) {
-
+                collection.forEach(e -> ensure(e, isEncrypt));
             }
         }
 

@@ -15,7 +15,7 @@ public class Crypt {
             for (Field field: object.getClass().getDeclaredFields()) {
                 field.setAccessible(true);
                 Annotation annotation = field.getAnnotation(Annotated.class);
-                if (annotation != null) {
+                if (annotation != null && field.get(object) != null) {
                     // Just reverse a string
                     StringBuilder value = new StringBuilder((String) field.get(object));
                     value = value.reverse();

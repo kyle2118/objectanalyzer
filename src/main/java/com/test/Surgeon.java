@@ -2,37 +2,57 @@ package com.test;
 
 
 import com.test.api.Crypt;
+import com.test.domain.BeanA;
+import com.test.domain.BeanB;
 import com.test.log.Logger;
 
 import javax.lang.model.type.PrimitiveType;
 import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 
 public class Surgeon {
-    private Logger logger;
-    private Crypt crypt;
+    public Logger logger;
+    public Crypt crypt;
 
     public Surgeon() {
         logger = new Logger();
         crypt = new Crypt();
     }
 
-    public void doIt(Object object, boolean isEncrypt) {
-        String command = isEncrypt ? "Encryption" : "Decryption";
+    public void method1(Object object, boolean isEncrypt) {
+//        String command = isEncrypt ? "Encryption" : "Decryption";
         long startNs = System.nanoTime();
-        logger.log(String.format("%s of %s object starting.", command, object.getClass().getSimpleName()));
+//        logger.log(String.format("%s of %s object starting.", command, object.getClass().getSimpleName()));
         try {
             ensure(object, isEncrypt);
         } catch (Exception e) {
             logger.log("Exception!!!");
+            throw e;
         } finally {
-            logger.log(String.format("%s finished in %d ms", command, (System.nanoTime() - startNs) / 1000));
+//            logger.log(String.format("%s finished in %d ms", command, (System.nanoTime() - startNs) / 1000));
         }
     }
 
-    private void ensure(Object object, boolean isEncrypt) {
+    public void method2(Object object, boolean isEncrypt) {
+        try {
+
+            if (object instanceof BeanA) {
+                BeanA beanA = (BeanA) object;
+                Crypt.Operation operation = isEncrypt? Crypt.Operation.ONE: Crypt.Operation.TWO;
+                crypt.crypt(operation, beanA);
+                crypt.crypt(operation, beanA.getBeanB());
+                for (Map.Entry<String, BeanB> entry: beanA.getStringBeanBMap().entrySet()) {
+                    crypt.crypt(operation, entry.getValue());
+                }
+            }
+        } catch (Exception e) {
+            logger.log("Exception!!!");
+            throw e;
+        }
+    }
+
+    public void ensure(Object object, boolean isEncrypt) {
         if (object == null) {
             return;
         }
@@ -88,7 +108,7 @@ public class Surgeon {
 
     }
 
-    private void handleMap(Map<?, ?> map, boolean isEncrypt) {
+    public void handleMap(Map<?, ?> map, boolean isEncrypt) {
         if (map == null) {
             return;
         }
@@ -113,11 +133,20 @@ public class Surgeon {
      *
      * @param collection is a collection(list, set, queue, stack, vector)
      */
-    private void handleCollection(Collection<?> collection, boolean isEncrypt) {
+    public void handleCollection(Collection<?> collection, boolean isEncrypt) {
         if (collection == null) {
             return;
         }
-        Class typeClass;
+        for (Object o : collection) {
+            Class<?> elementClass = o.getClass();
+            if (!Collection.class.isAssignableFrom(elementClass)
+                    || !Map.class.isAssignableFrom(elementClass)
+                    || !isComplex(elementClass)) {
+                break;
+            }
+            ensure(o, isEncrypt);
+        }
+        /*Class typeClass;
         Iterator iterator = collection.iterator();
         if (iterator.hasNext()) {
             Object element = iterator.next();
@@ -128,7 +157,7 @@ public class Surgeon {
                     ensure(o, isEncrypt);
                 }
             }
-        }
+        }*/
 
 
     }
@@ -139,7 +168,7 @@ public class Surgeon {
      * @param clazz is a {@link Class} object
      * @return true if class is a bean, false otherwise
      */
-    private boolean isComplex(Class<?> clazz) {
+    public boolean isComplex(Class<?> clazz) {
 
         // Number is a super type of Byte, Short, Integer, Float, Double
 

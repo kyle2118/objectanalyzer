@@ -58,6 +58,56 @@
             <set />
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/../rxcheckout/src/main/java/com/walgreens/ecomm/rx/StoreManager.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../rxcheckout/src/main/java/com/walgreens/ecomm/rx/constant/RetailConstant.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../rxcheckout/src/main/java/com/walgreens/ecomm/rx/controllers/OrderCheckoutController.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../rxcheckout/src/main/java/com/walgreens/ecomm/rx/services/OrderCheckoutService.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../rxcheckout/src/main/java/com/walgreens/ecomm/rx/services/consumers/rxsettings/RxSettingService.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../rxcheckout/src/main/java/com/walgreens/ecomm/rx/services/consumers/rxsettings/bean/FetchCustomerInfoRequest.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../rxcheckout/src/main/java/com/walgreens/ecomm/rx/ui/request/ReviewOrderRequest.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../rxcheckout/src/main/java/com/walgreens/ecomm/rx/utils/VoltageManager.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../rxcheckout/src/main/resources/application.yml">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../rxcheckout/src/main/resources/bootstrap.yml">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="/fragment.java">
           <value>
             <set />

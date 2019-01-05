@@ -26,9 +26,9 @@ public class Surgeon {
         try {
             // Analyze object itself
 
-            // Handle Iterable
             Class<?> objectClass = object.getClass();
 
+            // Handle collection
             if (Collection.class.isAssignableFrom(objectClass)) {
                 handleCollection((Collection<?>) object, isEncrypt);
 
@@ -55,21 +55,15 @@ public class Surgeon {
             // Analyze guts of an object
             for (Field declaredField : object.getClass().getDeclaredFields()) {
                 declaredField.setAccessible(true);
-                Type fieldType = declaredField.getType();
-                /*System.out.println(declaredField.getClass());
-                System.out.println((declaredField.getType()));
-                System.out.println(declaredField.getDeclaringClass());
-                System.out.println(fieldType.getTypeName());
-                System.out.println(fieldType.getClass());*/
 
-                if (Iterable.class.isAssignableFrom(declaredField.getType()) ||
-                        Map.class.isAssignableFrom(declaredField.getType())) {
+                Class<?> fieldType = declaredField.getType();
+
+                // reflect a map, collection or a bean
+                if (Collection.class.isAssignableFrom(fieldType)
+                        || Map.class.isAssignableFrom(fieldType)
+                        || isComplex(fieldType)) {
                     ensure(declaredField.get(object), isEncrypt);
                 }
-                /*if ((fieldType.getClass()).isAssignableFrom(Iterable.class) ||
-                        fieldType.getClass().isAssignableFrom(Map.class)) {
-                    ensure(declaredField.get(object), isEncrypt);
-                }*/
             }
             // perform an operation
 

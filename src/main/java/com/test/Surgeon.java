@@ -39,11 +39,14 @@ public class Surgeon {
 
             if (object instanceof BeanA) {
                 BeanA beanA = (BeanA) object;
-                Crypt.Operation operation = isEncrypt? Crypt.Operation.ONE: Crypt.Operation.TWO;
+                Crypt.Operation operation = isEncrypt? Crypt.Operation.ONE : Crypt.Operation.TWO;
                 crypt.crypt(operation, beanA);
                 crypt.crypt(operation, beanA.getBeanB());
                 for (Map.Entry<String, BeanB> entry: beanA.getStringBeanBMap().entrySet()) {
                     crypt.crypt(operation, entry.getValue());
+                }
+                for (BeanB beanB : beanA.getBeanBList()) {
+                    crypt.crypt(operation, beanB);
                 }
             }
         } catch (Exception e) {
@@ -77,9 +80,14 @@ public class Surgeon {
 //                handleMap((Map<?, ?>)object, isEncrypt);
                 for (Map.Entry<?, ?> entry : objectMap.entrySet()) {
                     // entry key must be a primitive, wrapper or String
-                    if (isComplex(entry.getValue().getClass())) {
-                        ensure(entry.getValue(), isEncrypt);
+                    Class<?> valueClass = entry.getValue().getClass();
+                    Class<?> keyClass = entry.getValue().getClass();
+                    if (!Collection.class.isAssignableFrom(valueClass)
+                            || !Map.class.isAssignableFrom(valueClass)
+                            || !isComplex(valueClass)) {
+                        break;
                     }
+                    ensure(entry.getValue(), isEncrypt);
                 }
                 return;
             }

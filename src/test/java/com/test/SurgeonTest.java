@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 public class SurgeonTest {
-    private static final long TEST_NUMBER = 1000;
-    private static final long MAP_SIZE = 100;
+    private static final long TEST_NUMBER = 100;
+    private static final long MAP_SIZE = 100_000;
     private static final long LIST_SIZE = 100_000;
 
     private Surgeon surgeon = new Surgeon();
@@ -39,31 +39,41 @@ public class SurgeonTest {
         inputBean.setBeanBList(list);
     }
 
+    /**
+     * Using reflection
+     */
     @Test
     public void checkPerfomance() {
 
 //        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(inputBean));
-        System.out.println("Start1:");
+        System.out.println("Reflection:");
         long startNs = System.nanoTime();
         for (int i = 0; i < TEST_NUMBER; i++) {
             surgeon.method1(inputBean, true);
         }
-        System.out.println("Finish1: " + ((System.nanoTime() - startNs) / 1_000_000) + " ms");
-        System.out.println("Start2:");
-        startNs = System.nanoTime();
+        System.out.println("Finished reflection: " + ((System.nanoTime() - startNs) / 1_000_000) + " ms");
+//        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(inputBean));
+    }
+
+    /**
+     * Not using reflection
+     */
+    @Test
+    public void approach2() {
+        System.out.println("Standart:");
+        long startNs = System.nanoTime();
         for (int i = 0; i < TEST_NUMBER; i++) {
             surgeon.method2(inputBean, true);
         }
-        System.out.println("Finish: " + ((System.nanoTime() - startNs) / 1_000_000) + " ms");
-//        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(inputBean));
+        System.out.println("Finished standard: " + ((System.nanoTime() - startNs) / 1_000_000) + " ms");
     }
-    @Test
+//    @Test
     public void handleCollectionDirectly() {
         List<BeanB> list = new ArrayList<>();
         list.add(new BeanB("someString"));
         surgeon.handleCollection(list, true);
     }
-    @Test
+//    @Test
     public void handleCollection() {
         long startNs = System.nanoTime();
         BeanA beanA = new BeanA();

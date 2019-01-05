@@ -1,1 +1,1 @@
-target/.idea
+target/.idea*/*.class

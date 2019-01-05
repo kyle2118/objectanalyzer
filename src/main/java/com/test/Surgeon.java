@@ -1,37 +1,49 @@
 package com.test;
 
 
+import com.test.api.Crypt;
 import com.test.log.Logger;
 
+import javax.lang.model.type.PrimitiveType;
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.stream.Stream;
 
 public class Surgeon {
     private Logger logger;
+    private Crypt crypt;
 
     public Surgeon() {
         logger = new Logger();
+        crypt = new Crypt();
     }
 
-    public void ensure(Object object, boolean isEncrypt) {
+    public void doIt(Object object, boolean isEncrypt) {
         String command = isEncrypt ? "Encryption" : "Decryption";
-        long startMs = System.currentTimeMillis();
+        long startNs = System.nanoTime();
         logger.log(String.format("%s of %s object starting.", command, object.getClass().getSimpleName()));
+        try {
+            ensure(object, isEncrypt);
+        } catch (Exception e) {
+            logger.log("Exception!!!");
+        } finally {
+            logger.log(String.format("%s finished in %d ms", command, (System.nanoTime() - startNs) / 1000));
+        }
+    }
 
+    private void ensure(Object object, boolean isEncrypt) {
+        if (object == null) {
+            return;
+        }
         try {
             // Analyze object itself
-
             Class<?> objectClass = object.getClass();
 
             // Handle collection
             if (Collection.class.isAssignableFrom(objectClass)) {
                 handleCollection((Collection<?>) object, isEncrypt);
-
+                return;
             }
             // Handle Map
             /*
@@ -42,13 +54,14 @@ public class Surgeon {
              */
             if (Map.class.isAssignableFrom(objectClass)) {
                 Map<?, ?> objectMap = (Map<?, ?>) object;
-                handleMap((Map<?, ?>)object, isEncrypt);
+//                handleMap((Map<?, ?>)object, isEncrypt);
                 for (Map.Entry<?, ?> entry : objectMap.entrySet()) {
                     // entry key must be a primitive, wrapper or String
                     if (isComplex(entry.getValue().getClass())) {
                         ensure(entry.getValue(), isEncrypt);
                     }
                 }
+                return;
             }
 
 
@@ -66,11 +79,11 @@ public class Surgeon {
                 }
             }
             // perform an operation
+            Crypt.Operation operation = isEncrypt? Crypt.Operation.ONE: Crypt.Operation.TWO;
+            crypt.crypt(operation, object);
 
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            logger.log(String.format("%s finished in", command));
         }
 
     }
@@ -111,7 +124,9 @@ public class Surgeon {
             typeClass = element.getClass();
             logger.log(String.format("First element type: %s", typeClass));
             if (isComplex(typeClass)) {
-                collection.forEach(e -> ensure(e, isEncrypt));
+                for (Object o : collection) {
+                    ensure(o, isEncrypt);
+                }
             }
         }
 
@@ -127,8 +142,10 @@ public class Surgeon {
     private boolean isComplex(Class<?> clazz) {
 
         // Number is a super type of Byte, Short, Integer, Float, Double
-        return !Number.class.isAssignableFrom(clazz)
-                || !Character.class.isAssignableFrom(clazz)
-                || !CharSequence.class.isAssignableFrom(clazz);
+
+        return !PrimitiveType.class.isAssignableFrom(clazz)
+                && !Number.class.isAssignableFrom(clazz)
+                && !Character.class.isAssignableFrom(clazz)
+                && !CharSequence.class.isAssignableFrom(clazz);
     }
 }

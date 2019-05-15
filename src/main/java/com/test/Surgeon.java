@@ -3,7 +3,6 @@ package com.test;
 
 import com.test.api.Crypt;
 import com.test.domain.BeanA;
-import com.test.domain.BeanB;
 import com.test.log.Logger;
 
 import javax.lang.model.type.PrimitiveType;
@@ -34,21 +33,15 @@ public class Surgeon {
         }
     }
 
-    public void method2(Object object, boolean isEncrypt) {
+    public void method2(BeanA beanA, boolean isEncrypt) {
         try {
-
-            if (object instanceof BeanA) {
-                BeanA beanA = (BeanA) object;
-                Crypt.Operation operation = isEncrypt? Crypt.Operation.ONE : Crypt.Operation.TWO;
-                crypt.crypt(operation, beanA);
-                crypt.crypt(operation, beanA.getBeanB());
-                for (Map.Entry<String, BeanB> entry: beanA.getStringBeanBMap().entrySet()) {
-                    crypt.crypt(operation, entry.getValue());
-                }
-                for (BeanB beanB : beanA.getBeanBList()) {
-                    crypt.crypt(operation, beanB);
-                }
-            }
+            Crypt.Operation operation = isEncrypt? Crypt.Operation.ONE : Crypt.Operation.TWO;
+            crypt.crypt(operation, beanA);
+            crypt.crypt(operation, beanA.getBeanB());
+            beanA.getBeanBList().forEach(b -> crypt.crypt(operation, b));
+            beanA.getBeanCList().forEach(c -> crypt.crypt(operation, c));
+            beanA.getStringBeanBMap().forEach((key, value) -> crypt.crypt(operation, value));
+            beanA.getStringListMap().forEach((key, value) -> value.forEach(b -> crypt.crypt(operation, b)));
         } catch (Exception e) {
             logger.log("Exception!!!");
             throw e;
@@ -62,7 +55,6 @@ public class Surgeon {
         try {
             // Analyze object itself
             Class<?> objectClass = object.getClass();
-
             // Handle collection
             if (Collection.class.isAssignableFrom(objectClass)) {
                 handleCollection((Collection<?>) object, isEncrypt);

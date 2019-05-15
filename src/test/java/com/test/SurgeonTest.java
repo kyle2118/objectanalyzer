@@ -6,9 +6,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.test.TestUtil.beanCGen;
+import static com.test.TestUtil.stringGen;
 
 public class SurgeonTest {
     private static final long TEST_NUMBER = 100;
@@ -39,11 +43,67 @@ public class SurgeonTest {
         inputBean.setBeanBList(list);
     }
 
+    @Test
+    public void surgeonTest() {
+        int times = 50_000;
+
+        long mean1 = 0;
+        for (int i = 0; i < times; i++) {
+            long startNs = System.nanoTime();
+            surgeon.method2(beanAGen(), true);
+            long finish = System.nanoTime();
+            mean1 += (finish - startNs);
+        }
+        System.err.println(mean1 / (times * 1.0));
+        long mean = 0;
+        for (int i = 0; i < times; i++) {
+            long startNs = System.nanoTime();
+            surgeon.method1(beanAGen(), true);
+            long finish = System.nanoTime();
+            mean += (finish - startNs);
+        }
+        System.err.println(mean / (times * 1.0));
+    }
+
+    private BeanA beanAGen() {
+        BeanB beanB1 = new BeanB(stringGen(), stringGen(), Arrays.asList(beanCGen(), beanCGen(), beanCGen(), beanCGen()));
+        BeanB beanB2 = new BeanB(stringGen(), stringGen(), Arrays.asList(beanCGen(), beanCGen(), beanCGen(), beanCGen()));
+        BeanB beanB3 = new BeanB(stringGen(), stringGen(), Arrays.asList(beanCGen(), beanCGen(), beanCGen(), beanCGen()));
+        BeanB beanB4 = new BeanB(stringGen(), stringGen(), Arrays.asList(beanCGen(), beanCGen(), beanCGen(), beanCGen()));
+
+        BeanA beanA = new BeanA();
+        beanA.setBeanBList(Arrays.asList(beanB1, beanB2, beanB3, beanB4));
+        beanA.setBeanCList(Arrays.asList(beanCGen(), beanCGen(), beanCGen(), beanCGen(), beanCGen()));
+        beanA.setBeanB(new BeanB(stringGen(), stringGen(), Arrays.asList(beanCGen(), beanCGen(), beanCGen(), beanCGen())));
+        beanA.setBeanAStringField1(stringGen());
+        beanA.setBeanAStringField2(stringGen());
+
+        Map<String, BeanB> stringBeanBMap = new HashMap<>() {{
+            put(stringGen(), new BeanB(stringGen(), stringGen(), Arrays.asList(beanCGen(), beanCGen(), beanCGen(), beanCGen())));
+            put(stringGen(), new BeanB(stringGen(), stringGen(), Arrays.asList(beanCGen(), beanCGen(), beanCGen(), beanCGen())));
+            put(stringGen(), new BeanB(stringGen(), stringGen(), Arrays.asList(beanCGen(), beanCGen(), beanCGen(), beanCGen())));
+        }};
+        beanA.setStringBeanBMap(stringBeanBMap);
+
+        Map<String, List<BeanB>> stringListMap = new HashMap<>() {{
+            BeanB b1 = new BeanB(stringGen(), stringGen(), Arrays.asList(beanCGen(), beanCGen(), beanCGen(), beanCGen()));
+            BeanB b2 = new BeanB(stringGen(), stringGen(), Arrays.asList(beanCGen(), beanCGen(), beanCGen(), beanCGen()));
+            BeanB b3 = new BeanB(stringGen(), stringGen(), Arrays.asList(beanCGen(), beanCGen(), beanCGen(), beanCGen()));
+            BeanB b4 = new BeanB(stringGen(), stringGen(), Arrays.asList(beanCGen(), beanCGen(), beanCGen(), beanCGen()));
+            BeanB b5 = new BeanB(stringGen(), stringGen(), Arrays.asList(beanCGen(), beanCGen(), beanCGen(), beanCGen()));
+            BeanB b6 = new BeanB(stringGen(), stringGen(), Arrays.asList(beanCGen(), beanCGen(), beanCGen(), beanCGen()));
+            put(stringGen(), Arrays.asList(b1, b2, b3));
+            put(stringGen(), Arrays.asList(b4, b5, b6));
+        }};
+        beanA.setStringListMap(stringListMap);
+        return beanA;
+    }
+
     /**
      * Using reflection
      */
     @Test
-    public void checkPerfomance() {
+    public void checkPerformance() {
 
 //        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(inputBean));
         System.out.println("Reflection:");
@@ -60,7 +120,7 @@ public class SurgeonTest {
      */
     @Test
     public void approach2() {
-        System.out.println("Standart:");
+        System.out.println("Standard:");
         long startNs = System.nanoTime();
         for (int i = 0; i < TEST_NUMBER; i++) {
             surgeon.method2(inputBean, true);
